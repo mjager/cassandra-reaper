@@ -24,10 +24,11 @@ import com.spotify.reaper.cassandra.JmxProxy;
 import com.spotify.reaper.cassandra.RepairStatusHandler;
 import com.spotify.reaper.core.RepairSegment;
 import com.spotify.reaper.core.RepairUnit;
+import com.spotify.reaper.utils.SimpleCondition;
 
 import org.apache.cassandra.repair.RepairParallelism;
 import org.apache.cassandra.service.ActiveRepairService;
-import org.apache.cassandra.utils.SimpleCondition;
+
 import org.joda.time.DateTime;
 import org.joda.time.Seconds;
 import org.slf4j.Logger;
@@ -94,12 +95,12 @@ public final class SegmentRunner implements RepairStatusHandler, Runnable {
   public static void postpone(AppContext context, RepairSegment segment) {
     LOG.warn("Postponing segment {}", segment.getId());
     context.storage.updateRepairSegment(segment.with()
-                                            .state(RepairSegment.State.NOT_STARTED)
-                                            .coordinatorHost(null)
-                                            .repairCommandId(null)
-                                            .startTime(null)
-                                            .failCount(segment.getFailCount() + 1)
-                                            .build(segment.getId()));
+            .state(RepairSegment.State.NOT_STARTED)
+            .coordinatorHost(null)
+            .repairCommandId(null)
+            .startTime(null)
+            .failCount(segment.getFailCount() + 1)
+            .build(segment.getId()));
     segmentRunners.remove(segment.getId());
   }
 
@@ -113,7 +114,7 @@ public final class SegmentRunner implements RepairStatusHandler, Runnable {
   private void runRepair() {
     final RepairSegment segment = context.storage.getRepairSegment(segmentId).get();
     try (JmxProxy coordinator = context.jmxConnectionFactory
-        .connectAny(Optional.<RepairStatusHandler>of(this), potentialCoordinators)) {
+            .connectAny(Optional.<RepairStatusHandler>of(this), potentialCoordinators)) {
 
       if (segmentRunners.containsKey(segmentId)) {
         LOG.error("SegmentRunner already exists for segment with ID: " + segmentId);
@@ -139,7 +140,7 @@ public final class SegmentRunner implements RepairStatusHandler, Runnable {
           //  return 0;
           LOG.info("Nothing to repair for keyspace {}", keyspace);
           context.storage.updateRepairSegment(segment.with()
-              .coordinatorHost(coordinator.getHost())
+                  .coordinatorHost(coordinator.getHost())
               .state(RepairSegment.State.DONE)
               .build(segmentId));
           segmentRunners.remove(segment.getId());
@@ -148,9 +149,9 @@ public final class SegmentRunner implements RepairStatusHandler, Runnable {
 
         LOG.debug("Triggered repair with command id {}", commandId);
         context.storage.updateRepairSegment(segment.with()
-                                                .coordinatorHost(coordinator.getHost())
-                                                .repairCommandId(commandId)
-                                                .build(segmentId));
+                .coordinatorHost(coordinator.getHost())
+                .repairCommandId(commandId)
+                .build(segmentId));
         String eventMsg = String.format("Triggered repair of segment %d via host %s",
                                         segment.getId(), coordinator.getHost());
         repairRunner.updateLastEvent(eventMsg);
@@ -276,9 +277,9 @@ public final class SegmentRunner implements RepairStatusHandler, Runnable {
         case STARTED:
           DateTime now = DateTime.now();
           context.storage.updateRepairSegment(currentSegment.with()
-                                                  .state(RepairSegment.State.RUNNING)
-                                                  .startTime(now)
-                                                  .build(segmentId));
+                  .state(RepairSegment.State.RUNNING)
+                  .startTime(now)
+                  .build(segmentId));
           LOG.debug("updated segment {} with state {}", segmentId, RepairSegment.State.RUNNING);
           break;
         case SESSION_SUCCESS:
@@ -286,7 +287,7 @@ public final class SegmentRunner implements RepairStatusHandler, Runnable {
               segmentId, repairNumber);
           context.storage.updateRepairSegment(currentSegment.with()
               .state(RepairSegment.State.DONE)
-              .endTime(DateTime.now())
+                  .endTime(DateTime.now())
               .build(segmentId));
           break;
         case SESSION_FAILED:
