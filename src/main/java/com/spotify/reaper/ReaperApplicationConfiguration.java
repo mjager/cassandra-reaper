@@ -24,6 +24,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.DefaultValue;
 
 import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
@@ -40,9 +41,14 @@ public class ReaperApplicationConfiguration extends Configuration {
 
   @JsonProperty
   @NotNull
-  @DecimalMin(value = "0", inclusive=false)
+  @DecimalMin(value = "0", inclusive = false)
   @Max(1)
   private Double repairIntensity;
+
+  @JsonProperty
+  @NotNull
+  @DefaultValue("7")
+  private Integer scheduleDaysBetween;
 
   @JsonProperty
   @NotNull
@@ -91,6 +97,14 @@ public class ReaperApplicationConfiguration extends Configuration {
 
   public void setRepairIntensity(double repairIntensity) {
     this.repairIntensity = repairIntensity;
+  }
+
+  public Integer getScheduleDaysBetween() {
+    return scheduleDaysBetween;
+  }
+
+  public void setScheduleDaysBetween(int scheduleDaysBetween) {
+    this.scheduleDaysBetween = scheduleDaysBetween;
   }
 
   public int getRepairRunThreadCount() {
@@ -164,6 +178,7 @@ public class ReaperApplicationConfiguration extends Configuration {
     public String getUsername() {
       return username;
     }
+
     public String getPassword() {
       return password;
     }
